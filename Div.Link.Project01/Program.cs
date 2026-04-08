@@ -71,14 +71,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
 if (app.Environment.IsDevelopment())
 {
     // Development specific settings if any
 }
 
-            app.UseStaticFiles();
+app.UseDefaultFiles(); // Allow index.html to be the default page
+app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
