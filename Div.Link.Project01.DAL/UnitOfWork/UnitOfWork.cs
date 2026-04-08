@@ -1,4 +1,4 @@
-﻿using Div.Link.Project01.DAL.Data;
+using Div.Link.Project01.DAL.Data;
 using Div.Link.Project01.DAL.Repository;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace Div.Link.Project01.DAL.UnitOfWork
         private IDoctorRepository _doctorRepository;
         public UnitOfWork(ApplicationDbContext dbContext) 
         {
-            
+            this.dbContext = dbContext;
         }
 
         public IDoctorRepository DoctorRepository => _doctorRepository ??= new DoctorRepository(dbContext);

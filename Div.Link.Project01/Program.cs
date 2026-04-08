@@ -9,13 +9,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+using Div.Link.Project01.BLL;
+using Div.Link.Project01.DAL.Models;
+using Microsoft.AspNetCore.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
-//builder.Services.AddServices(builder.Configuration);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddServices(builder.Configuration);
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,7 +73,7 @@ if (app.Environment.IsDevelopment())
                 app.UseSwaggerUI();
             }
 
-            //app.UseStaticFiles();
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");

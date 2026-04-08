@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Div.Link.Project01.BLL.Dto
         public string Phone { get; set; }
 
         [Required]
-        public int ApplicationUserId { get; set; }
+        public int ApplicationId { get; set; }
 
     }
 }
