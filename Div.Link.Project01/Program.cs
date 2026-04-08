@@ -67,6 +67,12 @@ builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
 
+// Essential for Railway and Docker to handle HTTPS correctly
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
+
 // Enable Swagger always for easy testing on Railway
 app.UseSwagger();
 app.UseSwaggerUI();
