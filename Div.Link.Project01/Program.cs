@@ -51,22 +51,6 @@ builder.Services.AddServices(builder.Configuration);
                 options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                 options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
                 options.CallbackPath = "/signin-google"; // Match your Google Console exactly
-                
-                // Force HTTPS for the redirect URI manually to solve Railway proxy issues
-                options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
-                {
-                    OnRedirectToAuthorizationEndpoint = context =>
-                    {
-                        var redirectUri = context.RedirectUri;
-                        // Replace the internal redirect_uri parameter to follow HTTPS
-                        if (redirectUri.Contains("redirect_uri=http%3A%2F%2F"))
-                        {
-                            redirectUri = redirectUri.Replace("redirect_uri=http%3A%2F%2F", "redirect_uri=https%3A%2F%2F");
-                        }
-                        context.Response.Redirect(redirectUri);
-                        return Task.CompletedTask;
-                    }
-                };
             });
 
             builder.Services.AddAuthorization();
@@ -84,10 +68,13 @@ builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
 
-// Enable detailed error pages for debugging the 500 error on Railway
-app.UseDeveloperExceptionPage();
+// 1. Force HTTPS and Trust Railway Proxy (Nuclear Fix)
+app.Use((context, next) =>
+{
+    context.Request.Scheme = "https";
+    return next();
+});
 
-// Essential for Railway and Docker to handle HTTPS correctly
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto,
@@ -95,63 +82,54 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     KnownProxies = { }
 });
 
-// Enable Swagger always for easy testing on Railway
+// 2. Cookie Policy for Modern Browser Security (SameSite Fix)
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Unspecified
+});
+
+app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-if (app.Environment.IsDevelopment())
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseCors("AllowAll");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+// 3. Automated Seeding
+using (var scope = app.Services.CreateScope())
 {
-    // Development specific settings if any
+    var services = scope.ServiceProvider;
+    try
+    {
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
+        {
+            if (!roleManager.RoleExistsAsync(roleName).Result)
+            {
+                roleManager.CreateAsync(new IdentityRole(roleName)).Wait();
+            }
+        }
+
+        var adminUser = userManager.FindByEmailAsync("admin@authpro.com").Result;
+        if (adminUser == null)
+        {
+            var newAdmin = new ApplicationUser { UserName = "admin", Email = "admin@authpro.com" };
+            var result = userManager.CreateAsync(newAdmin, "Admin@123").Result;
+            if (result.Succeeded) userManager.AddToRoleAsync(newAdmin, "Admin").Wait();
+        }
+    }
+    catch { }
 }
 
-app.UseDefaultFiles(); // Allow index.html to be the default page
-app.UseStaticFiles();
-            app.UseHttpsRedirection();
-
-            app.UseCors("AllowAll");
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.MapControllers();
-
-            // Seed Roles and Admin User
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                    
-                    // Create Roles
-                    string[] roleNames = { "Admin", "User" };
-                    foreach (var roleName in roleNames)
-                    {
-                        if (!roleManager.RoleExistsAsync(roleName).Result)
-                        {
-                            roleManager.CreateAsync(new IdentityRole(roleName)).Wait();
-                        }
-                    }
-
-                    // Create Default Admin
-                    var adminUser = userManager.FindByEmailAsync("admin@authpro.com").Result;
-                    if (adminUser == null)
-                    {
-                        var newAdmin = new ApplicationUser { UserName = "admin", Email = "admin@authpro.com" };
-                        var result = userManager.CreateAsync(newAdmin, "Admin@123").Result;
-                        if (result.Succeeded)
-                        {
-                            userManager.AddToRoleAsync(newAdmin, "Admin").Wait();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log error if needed
-                }
-            }
-
-            app.Run();
+app.Run();
        
     
