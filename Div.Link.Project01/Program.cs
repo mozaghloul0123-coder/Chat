@@ -51,12 +51,18 @@ builder.Services.AddServices(builder.Configuration);
                 options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
                 options.CallbackPath = "/signin-google"; // Match your Google Console exactly
                 
-                // Force HTTPS for the redirect URI
+                // Force HTTPS for the redirect URI manually to solve Railway proxy issues
                 options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
                 {
                     OnRedirectToAuthorizationEndpoint = context =>
                     {
-                        context.Response.Redirect(context.RedirectUri.Replace("http://", "https://"));
+                        var redirectUri = context.RedirectUri;
+                        // Replace the internal redirect_uri parameter to follow HTTPS
+                        if (redirectUri.Contains("redirect_uri=http%3A%2F%2F"))
+                        {
+                            redirectUri = redirectUri.Replace("redirect_uri=http%3A%2F%2F", "redirect_uri=https%3A%2F%2F");
+                        }
+                        context.Response.Redirect(redirectUri);
                         return Task.CompletedTask;
                     }
                 };
