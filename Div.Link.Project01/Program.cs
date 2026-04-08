@@ -110,7 +110,7 @@ using (var scope = app.Services.CreateScope())
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         
-        string[] roleNames = { "Admin", "User" };
+        string[] roleNames = { "Admin", "Doctor", "User" };
         foreach (var roleName in roleNames)
         {
             if (!roleManager.RoleExistsAsync(roleName).Result)

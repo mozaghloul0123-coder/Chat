@@ -132,6 +132,18 @@
             max-height: 60px;
             overflow: hidden;
         }
+        /* Role Specific Modules */
+        .role-module {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            display: none;
+            text-align: left;
+        }
+        .role-module h3 { font-size: 0.9rem; margin-top: 0; color: #818cf8; text-transform: uppercase; }
+        .module-item { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 0.85rem; color: #cbd5e1; }
+        .icon { width: 20px; height: 20px; }
     </style>
 </head>
 <body>
@@ -141,7 +153,7 @@
         <!-- Auth Section -->
         <div id="auth-section" class="glass-card">
             <h1>AuthPro</h1>
-            <p style="color: #94a3b8;">Welcome back, please login</p>
+            <p style="color: #94a3b8;">Enter world of possibilities</p>
             
             <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password">
@@ -157,14 +169,28 @@
         <div id="dashboard-section" class="glass-card">
             <div id="badge-role" class="badge">User</div>
             <div class="profile-pic" id="profile-initial">U</div>
-            <h1 id="welcome-name">Welcome Back!</h1>
+            <h1 id="welcome-name">Hello!</h1>
             <p id="user-display-email" class="user-email">user@example.com</p>
             
-            <button onclick="testAdmin()">Test Admin API</button>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+            <!-- Admin Module -->
+            <div id="admin-module" class="role-module">
+                <h3>👑 Admin Controls</h3>
+                <div class="module-item">🚀 Manage Doctors Database</div>
+                <div class="module-item">📈 View Analytics Dashboard</div>
+                <button style="padding: 8px; margin-top: 5px; font-size: 0.8rem;" onclick="testAdmin()">Verify Admin Access</button>
+            </div>
+
+            <!-- Doctor Module -->
+            <div id="doctor-module" class="role-module">
+                <h3>🩺 Doctor Workspace</h3>
+                <div class="module-item">📅 View Today's Appointments</div>
+                <div class="module-item">📝 Access Patient Records</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()" style="margin-top: 2rem;">Logout</button>
             
             <div class="token-info" id="token-box">
-                Token saved locally...
+                Secure Session Active
             </div>
         </div>
 
@@ -173,12 +199,9 @@
     <script>
         const API_BASE = window.location.origin;
 
-        // Check for token on load
         window.onload = () => {
             const token = localStorage.getItem('accessToken');
-            if (token) {
-                showDashboard(token);
-            }
+            if (token) showDashboard(token);
         }
 
         function loginWithGoogle() {
@@ -189,20 +212,27 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
             
-            // Decipher token payload (simplified)
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const email = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || payload.email || "User";
                 const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "User";
                 
-                document.getElementById('welcome-name').innerText = `Hello, ${email.split('@')[0]}!`;
+                document.getElementById('welcome-name').innerText = `Welcome, ${email.split('@')[0]}`;
                 document.getElementById('user-display-email').innerText = email;
                 document.getElementById('profile-initial').innerText = email[0].toUpperCase();
                 document.getElementById('badge-role').innerText = role;
-                document.getElementById('token-box').innerText = "Access Token: " + token.substring(0, 50) + "...";
-            } catch(e) {
-                console.error("Token parse error", e);
-            }
+
+                // Toggle Role Modules
+                if (role === "Admin") {
+                    document.getElementById('admin-module').style.display = 'block';
+                    document.getElementById('badge-role').style.background = 'rgba(234, 179, 8, 0.2)';
+                    document.getElementById('badge-role').style.color = '#eab308';
+                } else if (role === "Doctor") {
+                    document.getElementById('doctor-module').style.display = 'block';
+                    document.getElementById('badge-role').style.background = 'rgba(56, 189, 248, 0.2)';
+                    document.getElementById('badge-role').style.color = '#38bdf8';
+                }
+            } catch(e) { logout(); }
         }
 
         async function testAdmin() {
@@ -211,28 +241,19 @@
                 const response = await fetch(`${API_BASE}/api/Doctor`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (response.ok) {
-                    alert("Success! You have access to Doctors API.");
-                } else {
-                    alert("Access Denied: You need Admin role.");
-                }
-            } catch (err) {
-                alert("Error connecting to API.");
-            }
+                alert(response.ok ? "Access Granted: You are an Admin!" : "Access Denied: Admin role required.");
+            } catch (err) { alert("API Connection error."); }
         }
 
         function logout() {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            localStorage.clear();
             window.location.reload();
         }
 
-        // Catch token from URL if redirected back from Google
         const urlParams = new URLSearchParams(window.location.search);
         const urlToken = urlParams.get('token');
         if (urlToken) {
             localStorage.setItem('accessToken', urlToken);
-            // Clean URL for aesthetics
             window.history.replaceState({}, document.title, "/");
             showDashboard(urlToken);
         }
