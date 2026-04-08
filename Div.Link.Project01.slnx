@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Div.Link.Project01.BLL/Div.Link.Project01.BLL.csproj" />
+  <Project Path="Div.Link.Project01.DAL/Div.Link.Project01.DAL.csproj" />
+  <Project Path="Div.Link.Project01/Div.Link.Project01.Api.csproj" />
+</Solution>

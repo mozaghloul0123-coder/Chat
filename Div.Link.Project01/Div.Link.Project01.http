@@ -1,0 +1,6 @@
+@Div.Link.Project01_HostAddress = http://localhost:5296
+
+GET {{Div.Link.Project01_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
