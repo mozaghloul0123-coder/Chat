@@ -1,4 +1,4 @@
-﻿using Div.Link.Project01.BLL.Dto.Auth;
+using Div.Link.Project01.BLL.Dto.Auth;
 using Div.Link.Project01.BLL.Service;
 using Div.Link.Project01.DAL.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -33,8 +33,21 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        var token = await _servicesAuth.GenerateToken(user);
-        return Ok(new { Token = token });
+        // Assign default role
+        await _userManager.AddToRoleAsync(user, "User");
+
+        var accessToken = await _servicesAuth.GenerateToken(user);
+        var refreshToken = _servicesAuth.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new TokenDTO
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
     }
 
     // Login (Email + Password)
@@ -45,15 +58,52 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             return Unauthorized("Invalid credentials");
 
-        var token = await _servicesAuth.GenerateToken(user);
-        return Ok(new { Token = token });
+        var accessToken = await _servicesAuth.GenerateToken(user);
+        var refreshToken = _servicesAuth.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new TokenDTO
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
+    }
+
+    // Refresh Token
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenDTO tokenDto)
+    {
+        if (tokenDto is null)
+            return BadRequest("Invalid client request");
+
+        var principal = _servicesAuth.GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+        var username = principal.Identity.Name;
+        var user = await _userManager.FindByNameAsync(username);
+
+        if (user == null || user.RefreshToken != tokenDto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            return BadRequest("Invalid client request");
+
+        var newAccessToken = await _servicesAuth.GenerateToken(user);
+        var newRefreshToken = _servicesAuth.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new TokenDTO
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
+        });
     }
 
     //  Google Login
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
-        var properties = new AuthenticationProperties { RedirectUri = "/api/auth/Login" };
+        var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleCallback") };
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
 
@@ -68,16 +118,22 @@ public class AuthController : ControllerBase
 
         if (user == null)
         {
-            // Create user if not exists
-            user = new ApplicationUser
-            {
-                UserName = email,
-                Email = email
-            };
+            user = new ApplicationUser { UserName = email, Email = email };
             await _userManager.CreateAsync(user);
+            await _userManager.AddToRoleAsync(user, "User");
         }
 
-        var token = await _servicesAuth.GenerateToken(user);
-        return Ok(new { Token = token });
+        var accessToken = await _servicesAuth.GenerateToken(user);
+        var refreshToken = _servicesAuth.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new TokenDTO
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
     }
 }

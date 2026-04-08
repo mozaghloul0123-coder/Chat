@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Auth API - Premium Demo</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-circles">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-shield-halved"></i>
+                <span>AuthPro</span>
+            </div>
+            <nav>
+                <a href="#" class="nav-link active">Demo</a>
+                <a href="/swagger" class="nav-link" target="_blank">Docs</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="hero-section">
+                <h1>Secure your next <span class="gradient-text">Big Idea</span>.</h1>
+                <p>A production-ready Authentication System with JWT, Google Login, and Refresh Tokens. Built with ASP.NET Core & Railway.</p>
+                <div class="features-pill">
+                    <span><i class="fas fa-check"></i> JWT</span>
+                    <span><i class="fas fa-check"></i> Google OAuth</span>
+                    <span><i class="fas fa-check"></i> RBAC</span>
+                </div>
+            </div>
+
+            <div class="auth-card glass">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                    <button class="tab-btn" onclick="switchTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="far fa-envelope"></i>
+                            <input type="email" id="loginEmail" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In <i class="fas fa-arrow-right"></i></button>
+                    
+                    <div class="divider"><span>Or continue with</span></div>
+                    
+                    <a href="/api/auth/google-login" class="btn btn-outline">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+                        Google
+                    </a>
+                </form>
+
+                <!-- Register Form (Hidden by default) -->
+                <form id="registerForm" class="auth-form hidden">
+                    <div class="input-group">
+                        <label>Username</label>
+                        <div class="input-wrapper">
+                            <i class="far fa-user"></i>
+                            <input type="text" id="regUser" placeholder="JohnDoe" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="far fa-envelope"></i>
+                            <input type="email" id="regEmail" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="regPassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Create Account <i class="fas fa-user-plus"></i></button>
+                </form>
+
+                <div id="statusMessage" class="status-box hidden"></div>
+            </div>
+        </main>
+
+        <!-- User Stats (Shown after login) -->
+        <div id="userPanel" class="user-panel glass hidden">
+            <h3><i class="fas fa-user-circle"></i> Welcome Back, <span id="userName">User</span></h3>
+            <div class="token-area">
+                <label>Active JWT Token:</label>
+                <code id="tokenDisplay"></code>
+            </div>
+            <div class="admin-test">
+                <button onclick="testAdmin()" class="btn btn-sm btn-outline">Test Admin Endpoint</button>
+                <div id="adminResponse" class="admin-resp"></div>
+            </div>
+            <button onclick="logout()" class="btn btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
