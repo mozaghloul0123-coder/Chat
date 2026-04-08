@@ -67,11 +67,16 @@ builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
 
+// Enable Swagger always for easy testing on Railway
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+{
+    // Development specific settings if any
+}
 
             app.UseStaticFiles();
             app.UseHttpsRedirection();
