@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
-//using Microsoft.EntityFrameworkCore;
+//https://localhost:7028/swagger/index.html
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -39,7 +39,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                 options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                options.CallbackPath = "/signin-google";
+                options.CallbackPath = "/api/auth/Login";
             });
 
             builder.Services.AddAuthorization();
@@ -63,7 +63,7 @@ if (app.Environment.IsDevelopment())
                 app.UseSwaggerUI();
             }
 
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
@@ -72,23 +72,6 @@ if (app.Environment.IsDevelopment())
             app.UseAuthorization();
 
             app.MapControllers();
-
-            // Seed Roles
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                context.Database.Migrate();
-
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                string[] roles = { "Admin", "User" };
-                foreach (var role in roles)
-                {
-                    if (!roleManager.RoleExistsAsync(role).Result)
-                    {
-                        roleManager.CreateAsync(new IdentityRole(role)).Wait();
-                    }
-                }
-            }
 
             app.Run();
        
