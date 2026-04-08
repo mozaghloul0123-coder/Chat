@@ -49,7 +49,17 @@ builder.Services.AddServices(builder.Configuration);
             {
                 options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                 options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                options.CallbackPath = "/api/auth/Login";
+                options.CallbackPath = "/signin-google"; // Match your Google Console exactly
+                
+                // Force HTTPS for the redirect URI
+                options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+                {
+                    OnRedirectToAuthorizationEndpoint = context =>
+                    {
+                        context.Response.Redirect(context.RedirectUri.Replace("http://", "https://"));
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             builder.Services.AddAuthorization();
@@ -94,6 +104,43 @@ app.UseStaticFiles();
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Seed Roles and Admin User
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                    
+                    // Create Roles
+                    string[] roleNames = { "Admin", "User" };
+                    foreach (var roleName in roleNames)
+                    {
+                        if (!roleManager.RoleExistsAsync(roleName).Result)
+                        {
+                            roleManager.CreateAsync(new IdentityRole(roleName)).Wait();
+                        }
+                    }
+
+                    // Create Default Admin
+                    var adminUser = userManager.FindByEmailAsync("admin@authpro.com").Result;
+                    if (adminUser == null)
+                    {
+                        var newAdmin = new ApplicationUser { UserName = "admin", Email = "admin@authpro.com" };
+                        var result = userManager.CreateAsync(newAdmin, "Admin@123").Result;
+                        if (result.Succeeded)
+                        {
+                            userManager.AddToRoleAsync(newAdmin, "Admin").Wait();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error if needed
+                }
+            }
 
             app.Run();
        
