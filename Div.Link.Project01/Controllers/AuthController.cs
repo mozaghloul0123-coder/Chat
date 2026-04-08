@@ -130,10 +130,7 @@ public class AuthController : ControllerBase
         user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
         await _userManager.UpdateAsync(user);
 
-        return Ok(new TokenDTO
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
-        });
+        // Redirect back to dashboard with the token
+        return Redirect($"/index.html?token={accessToken}");
     }
 }

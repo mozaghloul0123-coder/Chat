@@ -3,120 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Auth API - Premium Demo</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <title>AuthPro - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --accent: #a855f7;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-weight: 600; margin-bottom: 0.5rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Auth Form Styles */
+        #auth-section { display: block; }
+        #dashboard-section { display: none; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5); }
+
+        .google-btn {
+            background: white;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Dashboard Styles */
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-email { color: #94a3b8; margin-bottom: 2rem; }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .logout-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.2); box-shadow: none; }
+
+        .token-info {
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 2rem;
+            word-break: break-all;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            max-height: 60px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    <div class="background-circles">
-        <div class="circle circle-1"></div>
-        <div class="circle circle-2"></div>
-        <div class="circle circle-3"></div>
-    </div>
 
     <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-shield-halved"></i>
-                <span>AuthPro</span>
-            </div>
-            <nav>
-                <a href="#" class="nav-link active">Demo</a>
-                <a href="/swagger" class="nav-link" target="_blank">Docs</a>
-            </nav>
-        </header>
-
-        <main>
-            <div class="hero-section">
-                <h1>Secure your next <span class="gradient-text">Big Idea</span>.</h1>
-                <p>A production-ready Authentication System with JWT, Google Login, and Refresh Tokens. Built with ASP.NET Core & Railway.</p>
-                <div class="features-pill">
-                    <span><i class="fas fa-check"></i> JWT</span>
-                    <span><i class="fas fa-check"></i> Google OAuth</span>
-                    <span><i class="fas fa-check"></i> RBAC</span>
-                </div>
-            </div>
-
-            <div class="auth-card glass">
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-                    <button class="tab-btn" onclick="switchTab('register')">Register</button>
-                </div>
-
-                <!-- Login Form -->
-                <form id="loginForm" class="auth-form">
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <div class="input-wrapper">
-                            <i class="far fa-envelope"></i>
-                            <input type="email" id="loginEmail" placeholder="name@example.com" required>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="loginPassword" placeholder="••••••••" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Sign In <i class="fas fa-arrow-right"></i></button>
-                    
-                    <div class="divider"><span>Or continue with</span></div>
-                    
-                    <a href="/api/auth/google-login" class="btn btn-outline">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
-                        Google
-                    </a>
-                </form>
-
-                <!-- Register Form (Hidden by default) -->
-                <form id="registerForm" class="auth-form hidden">
-                    <div class="input-group">
-                        <label>Username</label>
-                        <div class="input-wrapper">
-                            <i class="far fa-user"></i>
-                            <input type="text" id="regUser" placeholder="JohnDoe" required>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <div class="input-wrapper">
-                            <i class="far fa-envelope"></i>
-                            <input type="email" id="regEmail" placeholder="name@example.com" required>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="regPassword" placeholder="••••••••" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Create Account <i class="fas fa-user-plus"></i></button>
-                </form>
-
-                <div id="statusMessage" class="status-box hidden"></div>
-            </div>
-        </main>
-
-        <!-- User Stats (Shown after login) -->
-        <div id="userPanel" class="user-panel glass hidden">
-            <h3><i class="fas fa-user-circle"></i> Welcome Back, <span id="userName">User</span></h3>
-            <div class="token-area">
-                <label>Active JWT Token:</label>
-                <code id="tokenDisplay"></code>
-            </div>
-            <div class="admin-test">
-                <button onclick="testAdmin()" class="btn btn-sm btn-outline">Test Admin Endpoint</button>
-                <div id="adminResponse" class="admin-resp"></div>
-            </div>
-            <button onclick="logout()" class="btn btn-danger btn-sm">Logout</button>
+        
+        <!-- Auth Section -->
+        <div id="auth-section" class="glass-card">
+            <h1>AuthPro</h1>
+            <p style="color: #94a3b8;">Welcome back, please login</p>
+            
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            
+            <button onclick="login()">Sign In</button>
+            <button class="google-btn" onclick="loginWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                Sign in with Google
+            </button>
         </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="glass-card">
+            <div id="badge-role" class="badge">User</div>
+            <div class="profile-pic" id="profile-initial">U</div>
+            <h1 id="welcome-name">Welcome Back!</h1>
+            <p id="user-display-email" class="user-email">user@example.com</p>
+            
+            <button onclick="testAdmin()">Test Admin API</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            
+            <div class="token-info" id="token-box">
+                Token saved locally...
+            </div>
+        </div>
+
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const API_BASE = window.location.origin;
+
+        // Check for token on load
+        window.onload = () => {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                showDashboard(token);
+            }
+        }
+
+        function loginWithGoogle() {
+            window.location.href = `${API_BASE}/api/Auth/google-login`;
+        }
+
+        function showDashboard(token) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            
+            // Decipher token payload (simplified)
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const email = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || payload.email || "User";
+                const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "User";
+                
+                document.getElementById('welcome-name').innerText = `Hello, ${email.split('@')[0]}!`;
+                document.getElementById('user-display-email').innerText = email;
+                document.getElementById('profile-initial').innerText = email[0].toUpperCase();
+                document.getElementById('badge-role').innerText = role;
+                document.getElementById('token-box').innerText = "Access Token: " + token.substring(0, 50) + "...";
+            } catch(e) {
+                console.error("Token parse error", e);
+            }
+        }
+
+        async function testAdmin() {
+            const token = localStorage.getItem('accessToken');
+            try {
+                const response = await fetch(`${API_BASE}/api/Doctor`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    alert("Success! You have access to Doctors API.");
+                } else {
+                    alert("Access Denied: You need Admin role.");
+                }
+            } catch (err) {
+                alert("Error connecting to API.");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.reload();
+        }
+
+        // Catch token from URL if redirected back from Google
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+        if (urlToken) {
+            localStorage.setItem('accessToken', urlToken);
+            // Clean URL for aesthetics
+            window.history.replaceState({}, document.title, "/");
+            showDashboard(urlToken);
+        }
+    </script>
 </body>
 </html>
