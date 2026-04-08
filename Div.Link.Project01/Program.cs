@@ -30,6 +30,7 @@ builder.Services.AddServices(builder.Configuration);
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -82,6 +83,9 @@ builder.Services.AddServices(builder.Configuration);
             }); 
 
 var app = builder.Build();
+
+// Enable detailed error pages for debugging the 500 error on Railway
+app.UseDeveloperExceptionPage();
 
 // Essential for Railway and Docker to handle HTTPS correctly
 app.UseForwardedHeaders(new ForwardedHeadersOptions

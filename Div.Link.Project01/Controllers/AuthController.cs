@@ -110,7 +110,7 @@ public class AuthController : ControllerBase
     [HttpGet("google-callback")]
     public async Task<IActionResult> GoogleCallback()
     {
-        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
         if (!result.Succeeded) return Unauthorized();
 
         var email = result.Principal.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
